@@ -1,0 +1,29 @@
+{
+  "name": "jamesmckenzie",
+  "version": "1.0.0",
+  "description": "a stamford chat bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "cd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesthesnake/stamfrodchatbotreal.git"
+  },
+  "keywords": [
+    "stamford",
+    "chat",
+    "transit"
+  ],
+  "author": "james and mceknzie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jamesthesnake/stamfrodchatbotreal/issues"
+  },
+  "homepage": "https://github.com/jamesthesnake/stamfrodchatbotreal#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "request": "^2.74.0"
+  }
+}
