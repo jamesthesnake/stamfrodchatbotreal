@@ -1,5 +1,7 @@
 'use strict'
 
+//hello
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
@@ -38,6 +40,15 @@ const app = express()
 			sendGenericMessage(sender)
 			continue
 		    }
+		    if(text == "where is the Bus?"){
+			sendTracker(sender)
+			continue
+		    }
+		    if(text == "what is this app"){
+		        sendDescription(sender)
+			continue
+		    }
+
 		    sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
 		}
 		if (event.postback) {
@@ -73,6 +84,50 @@ const token = "EAAEPlSBXUQkBAEkoHGy7w4x2AMWV0HfyYDi44T7U3V3mJUxkYN0hv74LZBZC2thn
 	    }
 	})
 }
+    function sendDescription(sender){
+	messageData={
+	    text:"Stamford Chat Bot let's you now what's going on around you, when your next bus is, and local job openings."
+	}
+	request({
+		url: 'https://graph.facebook.com/v2.6/me/messages',
+		    qs: {access_token:token},
+		    method: 'POST',
+		    json: {
+		    recipient: {id:sender},
+			message: messageData,
+			}
+	    }, function(error, response, body) {
+		if (error) {
+		    console.log('Error sending messages: ', error)
+			} else if (response.body.error) {
+		    console.log('Error: ', response.body.error)
+			}
+	    }
+
+	    function sendTracker(sender) {
+	    let messageData = {
+		"attachment": {
+		    "type": "template",
+		    "payload": {
+			"template_type": "generic",
+			"elements": [{
+				"title": "First card",
+				"subtitle": "Transit Tracker - CT",
+				"image_url": "http://a4.mzstatic.com/us/r30/Purple60/v4/b6/d4/89/b6d48953-3f9b-b8e2-91c4-9d745451c738/icon175x175.png",
+				"buttons": [{
+					"type": "web_url",
+					"url": "https://itunes.apple.com/us/app/id909177532",
+					"title": "Transit Tracker - CT"
+				    }, {
+					"type": "postback",
+					"title": "Postback",
+					"payload": "Payload for first element in a generic bubble",
+				    }],
+			    }],
+		    }
+		}
+	    }
+	    }		
 
     function sendGenericMessage(sender) {
 	let messageData = {
@@ -106,6 +161,7 @@ const token = "EAAEPlSBXUQkBAEkoHGy7w4x2AMWV0HfyYDi44T7U3V3mJUxkYN0hv74LZBZC2thn
 		}
 	    }
 	}
+    }
 	function receivedPostback(event) {
 	    var senderID = event.sender.id;
 	    var recipientID = event.recipient.id;
