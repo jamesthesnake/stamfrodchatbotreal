@@ -39,12 +39,16 @@ var express = require('express')
 			    }
 			    else if(text == 'whats up'|| text== "what is this app"){
 				sendHiMessage(sender)
-				continue 
+				continue
 			    }
 			    else if(text == "when is the train"){
 				sendTrainMessage(sender)
 				continue
 			    }
+          else if (text == "bus map") {
+        sendMap(sender)
+        continue
+          }
 			    sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
 		    }
 		    if (event.postback) {
@@ -100,6 +104,30 @@ const token = "EAAEPlSBXUQkBAEkoHGy7w4x2AMWV0HfyYDi44T7U3V3mJUxkYN0hv74LZBZC2thn
 	    })
 
 	    }
+      function sendMap(sender) {
+      let messageData = {
+    "attachment": {
+        "type": "template",
+        "payload": {
+      "template_type": "generic",
+      "elements": [{
+        "title": "First card",
+        "subtitle": "Stamford Bus Map",
+        "image_url": "https://www.cttransit.com/sites/default/files/maps/division/stamford_local_8-16.pdf",
+        "buttons": [{
+          "type": "web_url",
+          "url": "https://www.cttransit.com/sites/default/files/maps/division/stamford_local_8-16.pdf",
+          "title": "Stamford Bus Map"
+            }, {
+          "type": "postback",
+          "title": "Postback",
+          "payload": "Payload for first element in a generic bubble",
+            }],
+          }],
+        }
+    }
+      }
+    }
 function sendGenericMessage(sender) {
     messageData = {
 	"attachment": {
@@ -133,7 +161,7 @@ function sendGenericMessage(sender) {
 	}
     }
 
-    
+
     request({
 	    url: 'https://graph.facebook.com/v2.6/me/messages',
 		qs: {access_token:token},
@@ -149,7 +177,7 @@ function sendGenericMessage(sender) {
 		console.log('Error: ', response.body.error)
 		    	    }
 	    	})
-	    } 
+	    }
 
 function sendTrainMessage(sender) {
     messageData = {
@@ -158,21 +186,21 @@ function sendTrainMessage(sender) {
             "payload": {
                 "template_type": "generic",
                 "elements": [{
-                        "title": "First card",                        
-                        "subtitle": "Transit Tracker - CT",           
+                        "title": "First card",
+                        "subtitle": "Transit Tracker - CT",
                         "image_url": "http://a4.mzstatic.com/us/r30/P\
 urple60/v4/b6/d4/89/b6d48953-3f9b-b8e2-91c4-9d745451c738/icon175x175.\
-png",                                                                 
-                        "buttons": [{                                 
-                                "type": "web_url",                    
+png",
+                        "buttons": [{
+                                "type": "web_url",
                                 "url": "https://itunes.apple.com/us/a\
-pp/id909177532",                                                      
-                                "title": "Transit Tracker - CT"       
-                            }, {                                      
-                                "type": "postback",                   
-                                "title": "Postback",                  
+pp/id909177532",
+                                "title": "Transit Tracker - CT"
+                            }, {
+                                "type": "postback",
+                                "title": "Postback",
                                 "payload": "Payload for first element\
- in a generic bubble",          
+ in a generic bubble",
                             }],
                     }, {
                         "title": "Second card",
