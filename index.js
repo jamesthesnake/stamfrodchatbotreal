@@ -70,39 +70,59 @@ app.post('/webhook/', function (req, res) {
           console.log("jenny")
           console.log(event)
           
-          console.log(event.message.attachments[0].type)
+          console.log(event.message.attachments[0].payload)
           
       }
       }
 //      let att=  event.message.attachments[0]
-
-      /*if(event.message.attachhments && event.message.attachments[0].type=="audio"){
+   /*   
+    if( event.message.attachments[0].type=="audio"){
           sendMovieMessage(sender)
-          sendAudioMessage(sender,att)
+          sendAudioMessage(sender,event)
           continue
       } 
-     else if(event.message.attachments && event.message.attachments[0].type=="location"){
+      if( event.message.attachments[0].type=="location"){
          var lat = event.message.attachments[0].payload.coordinates.lat
           var lng = event.message.attachments[0].payload.coordinates.long
           console.log(lat,lng)
-         sendLocationMessage(sender)
+         sendLocationMessage(sender,event)
          continue
          
-     } */
+     }
+/*
+      if(event.message.attachments[0].type=="video") {
+	  sendVideoMessage(sender)
+	  continue
+	  } */
       if (event.message && event.message.text) {
-        let text = event.message.text
-        if (text === 'Generic') {
+        let text =  event.message.text.toLowerCase()
+        if (text === 'generic') {
             sendGenericMessage(sender)
-            sendNameMessage(sender)
             continue
         }
-          if(text=="movie"){
+    
+        else  if(text=="where am i"){
+              sendLocationPlaceMessage(sender)
+              continue 
+          }
+              
+         else if(text=="movie"){
             sendMovieMessage(sender)
             continue
         }
+	 else if (text=="avon"){
+	     sendVideoMessage(sender)
+	     continue
+	 }
+         else if(text=="restaurant"){
+              sendResturantMessage(sender)
+              continue
+          }
+
         sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
       }
-        
+                        //  receivedPostback(event)
+  
       if (event.postback) {
         let text = JSON.stringify(event.postback)
         sendTextMessage(sender, "Postback received: "+text.substring(0, 200), token)
@@ -112,9 +132,15 @@ app.post('/webhook/', function (req, res) {
     res.sendStatus(200)
   })
 
-const token = "EAAEPlSBXUQkBAMhn8Xlp5sg7RWP4DpCNIqy9ZCbZA6MS3e5Ay5c7cfqBlDO3kTsl3ahZAVZArJ3a77izmA2HyhNocEXA9SDuvcKki1JySIitu2AGyXAoLbCpodCWInYZBE7owDl46jODbhrV064myHZBQKVki1AmYunuYZAqNIDEQZDZD"
+const token ="EAAEPlSBXUQkBAAHTkk711owZA1ZBZBBLXuTSHL0IXDZAO9BhHqnmWO4qw1DfT7BzRCDOToVUku3Lmp472PGZBeFxCL200wUaIBDq3NC2GLTitqbqcUR7ZBBhmwKx9YLSils8fZBfnp4VV16XNvQCP3ZAZCHYGEoyoduZC82aq5Tx9TzAZDZD"
 function sendTextMessage(sender, text) {
-    let messageData = { text:text }
+    let messageData = { text:text,
+                     "quick_replies":[
+      {
+        "content_type":"location",
+         }
+                         ]
+                      }
     request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {access_token:token},
@@ -130,6 +156,22 @@ function sendTextMessage(sender, text) {
             console.log('Error: ', response.body.error)
         }
     })
+}
+function receivedPostback(event) {
+  var senderID = event.sender.id;
+  var recipientID = event.recipient.id;
+  var timeOfPostback = event.timestamp;
+  console.log("bery")
+  // The 'payload' param is a developer-defined field which is set in a postback 
+  // button for Structured Messages. 
+  var payload = event.message.attachments.payload;
+
+  console.log("Received postback for user %d and page %d with payload '%s'  " + 
+    "at %d", senderID, recipientID,payload, timeOfPostback);
+
+  // When a postback is called, we'll send a message back to the sende to 
+  // let them know it was successful
+  sendTextMessage(senderID, "Postback called");
 }
 function recognizeSong (opts, cb) {
   let attachment = opts.message.attachments[0]
@@ -243,8 +285,86 @@ request({
 		}
     })
     } 
+function sendResturantMessage(sender){
+    let messageData= {
+     "attachment": {
+            "type": "image",
+            "payload": {
+                url:"http://fairfieldmirror.com/wp-content/uploads/2014/06/colony-grill-300x200.jpg"
+            }
+     }
+    }
+request({
+	url: 'https://graph.facebook.com/v2.6/me/messages',
+	    qs: {access_token:token},
+	    method: 'POST',
+	    json: {
+	    recipient: {id:sender},
+		message: messageData,
+		}
+    }, function(error, response, body) {
+	if (error) {
+	    console.log('Error sending messages: ', error)
+		} else if (response.body.error) {
+	    console.log('Error: ', response.body.error)
+		}
+    })
+    
+}
+function sendVideoMessage(sender){
+    let messageData={
+	attachment: {
+            "type": "video",
+            "payload": {
+		url: "https://lit-anchorage-71051.herokuapp.com/Thefile.mp4"
+	    }    }
+    }
+    request({
+	    url: 'https://graph.facebook.com/v2.6/me/messages',
+		qs: {access_token:token},
+		method: 'POST',
+		json: {
+		recipient: {id:sender},
+		    message: messageData,
+		    }
+	}, function(error, response, body) {
+	    if (error) {
+		console.log('Error sending messages: ', error)
+		    } else if (response.body.error) {
+		console.log('Error: ', response.body.error)
+		    }
+	})
+
+
+
+}
+function sendLocationPlaceMessage(sender){
+    let messageData = { text:"where are you?",
+                     "quick_replies":[
+      {
+        "content_type":"location",
+         }
+                         ]
+                      }
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {access_token:token},
+        method: 'POST',
+        json: {
+            recipient: {id:sender},
+            message: messageData,
+        }
+    }, function(error, response, body) {
+        if (error) {
+            console.log('Error sending messages: ', error)
+        } else if (response.body.error) {
+            console.log('Error: ', response.body.error)
+        }
+    })
+}
+    
+
 function sendGenericMessage(sender) {
-    console.log("yolo")
     console.log("https://graph.facebook.com/v2.6/" +sender +"?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token="+token)
  
     let messageData = {
@@ -295,11 +415,11 @@ function sendGenericMessage(sender) {
     })
 }
 function sendNameMessage(sender){
-   let pares=  app.get( "https://graph.facebook.com/v2.6/" +sender +"?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token="+token
-     ,function(response){response.setEncoding('utf8')  
-  response.on('data', console.log)  
-  response.on('error', console.error)  })
-   let messageData={text:pares.gender}
+   request({url: "https://graph.facebook.com/v2.6/" +sender +"?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token="+token
+     ,
+    qs:{access_token:token},
+    method: 'GET'
+           })
    request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {access_token:token},
@@ -317,11 +437,15 @@ function sendNameMessage(sender){
     })
     
 }
-function sendAudioMessage(sender,att){
+function sendAudioMessage(sender,event){
 
     let messageData={
-        text:"you sent audio "
-    }
+attachment: {
+            "type": "audio",
+            "payload": {
+               url: event.message.attachments[0].payload.url
+	}    }
+}
      request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
         qs: {access_token:token},
@@ -338,11 +462,25 @@ function sendAudioMessage(sender,att){
         }
     })
 }
-function sendLocationMessage(sender){
+function sendLocationMessage(sender,event){
 
-    let messageData={
-        text:"you sent location "
+
+
+  let messageData = {
+    "attachment": {
+      "type": "template",
+      "payload": {
+        "template_type": "generic",
+        "elements": [{
+          "title": 'Location Shared By Bot',
+          "subtitle": "Location Subtitle",
+          "image_url": "https://maps.googleapis.com/maps/api/staticmap?key=" + "  AIzaSyBFwMNFL402Cy0KUwaSdxw1oXtCAo03MSs" +
+          "&markers=color:red|label:B|" + event.message.attachments[0].payload.coordinates.lat + "," + event.message.attachments[0].payload.coordinates.long + "&size=360x360&zoom=13"
+        }]
+      }
     }
+
+  }
     
      request({
         url: 'https://graph.facebook.com/v2.6/me/messages',
@@ -360,6 +498,7 @@ function sendLocationMessage(sender){
         }
     })
 }
+
     
 function sendMovieMessage(sender){
     let messageData={
